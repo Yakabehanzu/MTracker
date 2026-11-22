@@ -420,7 +420,8 @@ dialog{border-radius:22px}
 @container (max-width:560px){.hero-in{grid-template-columns:minmax(0,1fr)}.gauge{margin-top:8px}.hero-bal .value{font-size:clamp(30px,11.5cqi,52px)}}
 .kpi-stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 .kpi-stack .kpi{padding:16px 20px;display:grid;align-content:center}
-.kpi-stack .kpi .value{font-weight:600;font-size:clamp(19px,2vw,24px);letter-spacing:-.02em}
+.kpi-stack .kpi .value{font-weight:600;font-size:clamp(19px,2vw,24px);letter-spacing:-.02em;white-space:nowrap}
+.kpi-stack .cur{font-size:.62em;vertical-align:.3em;color:inherit;opacity:.75}
 .delta{display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:12.5px}
 .delta.good{color:var(--income)}.delta.bad{color:var(--expense)}.delta.flat{color:var(--muted);font-weight:600}
 .delta .tri{font-size:9px}
@@ -451,7 +452,8 @@ dialog{border-radius:22px}
   .hero-card{padding:20px}
   .kpi-stack{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .kpi-stack .kpi:nth-child(3){grid-column:1/-1}
-  .kpi-stack .kpi{padding:14px 16px}
+  .kpi-stack .kpi{padding:14px 14px}
+  .kpi-stack .kpi .value{font-size:clamp(17px,5vw,20px)}
   .ov-top{gap:10px}
   .gauge{max-width:215px}
 }
@@ -514,6 +516,47 @@ nav.tabs .nav-ind{background:var(--accent)}
   .tabbar a{color:var(--muted)}
   .tabbar a[aria-current="page"]{color:var(--accent-ink)}
   .tabbar .nav-ind{background:var(--accent)}
+}
+
+/* ---- CATEGORY COLOURS: validated 8-hue order (dataviz reference), fixed per category; 9th+ = grey ---- */
+:root{--cat-1:#2a78d6;--cat-2:#eb6834;--cat-3:#1baf7a;--cat-4:#eda100;--cat-5:#e87ba4;--cat-6:#008300;--cat-7:#6250d6;--cat-8:#e34948;--cat-other:#A3A39E}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--cat-1:#3987e5;--cat-2:#d95926;--cat-3:#199e70;--cat-4:#c98500;--cat-5:#d55181;--cat-6:#0ca30c;--cat-7:#9085e9;--cat-8:#e66767;--cat-other:#6B6B67}}
+:root[data-theme="dark"]{--cat-1:#3987e5;--cat-2:#d95926;--cat-3:#199e70;--cat-4:#c98500;--cat-5:#d55181;--cat-6:#0ca30c;--cat-7:#9085e9;--cat-8:#e66767;--cat-other:#6B6B67}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+
+/* ---- LIQUID GLASS: soft brand wash behind translucent panels; real blur only on layers that float over content ---- */
+:root{--glass:rgba(255,255,255,.6);--glass-strong:rgba(255,255,255,.72);--glass-edge:rgba(255,255,255,.9);--glass-hi:rgba(255,255,255,1);--glass-drop:rgba(20,20,20,.10);--wash-1:rgba(215,53,31,.10);--wash-2:rgba(45,184,61,.13);--wash-3:rgba(42,120,214,.07)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glass:rgba(34,34,34,.55);--glass-strong:rgba(30,30,30,.72);--glass-edge:rgba(255,255,255,.08);--glass-hi:rgba(255,255,255,.10);--glass-drop:rgba(0,0,0,.45);--wash-1:rgba(255,107,87,.12);--wash-2:rgba(76,201,92,.10);--wash-3:rgba(57,135,229,.08)}}
+:root[data-theme="dark"]{--glass:rgba(34,34,34,.55);--glass-strong:rgba(30,30,30,.72);--glass-edge:rgba(255,255,255,.08);--glass-hi:rgba(255,255,255,.10);--glass-drop:rgba(0,0,0,.45);--wash-1:rgba(255,107,87,.12);--wash-2:rgba(76,201,92,.10);--wash-3:rgba(57,135,229,.08)}
+body{background:
+  radial-gradient(55% 45% at 8% 0%,var(--wash-1),transparent 70%),
+  radial-gradient(50% 50% at 100% 85%,var(--wash-2),transparent 70%),
+  radial-gradient(40% 40% at 70% 10%,var(--wash-3),transparent 70%),
+  var(--bg);background-attachment:fixed}
+.card{background:var(--glass);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi),0 1px 2px rgba(20,20,20,.03),0 14px 34px -18px var(--glass-drop)}
+.hero-card{background:linear-gradient(180deg,var(--glass) 45%,color-mix(in srgb,var(--hero-wash) 75%,transparent))}
+#ov-balances .bal{background:color-mix(in srgb,var(--surface) 55%,transparent);box-shadow:inset 0 1px 0 var(--glass-hi)}
+#ov-balances .bal.total{background:transparent;box-shadow:none}
+.top-search,.who,.sync{background:var(--glass-strong);box-shadow:inset 0 1px 0 var(--glass-hi),0 0 0 1px var(--glass-edge)}
+.seg{background:color-mix(in srgb,var(--surface-2) 70%,transparent)}
+dialog{background:var(--glass-strong);-webkit-backdrop-filter:blur(30px) saturate(1.6);backdrop-filter:blur(30px) saturate(1.6);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi),0 30px 70px -20px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,10,10,.28);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+@media (min-width:1100px){
+  header.top{background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5)}
+  /* floating glass rail; content sits close to it instead of centring in the leftover width */
+  .rail{margin:12px 0 12px 12px;top:12px;height:calc(100vh - 24px);border-radius:26px;background:var(--glass);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi),0 18px 40px -22px var(--glass-drop);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);padding:18px 12px 16px}
+  .stage .wrap{max-width:1480px;margin-left:0;padding-left:24px}
+  body.rail-collapsed .shell{grid-template-columns:76px minmax(0,1fr)}
+  body.rail-collapsed .rail{padding-inline:8px}
+  body.rail-collapsed .stage .wrap{padding-left:18px}
+}
+@media (max-width:759px){
+  header.top{background:color-mix(in srgb,var(--bg) 62%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+  .tabbar{background:color-mix(in srgb,var(--surface) 58%,transparent);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);box-shadow:inset 0 1px 0 var(--glass-hi),0 14px 34px -10px var(--glass-drop)}
+  dialog{background:var(--glass-strong)}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .tabbar,dialog,.rail{background:var(--surface)}
 }
 /* RECEIPTS:CSS (from trial/receipt.css) */
 /* Money Tracker - "Scan receipt" styles (trial). Uses the page's colour tokens. */
@@ -707,7 +750,7 @@ nav.tabs .nav-ind{background:var(--accent)}
     <div id="manage-content" class="view"></div>
   </section>
 </main>
-<footer class="wrap app-version">Money Tracker &middot; app 2</footer>
+<footer class="wrap app-version">Money Tracker &middot; app 2.1</footer>
 </div>
 </div>
 
@@ -1128,9 +1171,9 @@ function renderOverview(){
         <div class="g-foot">${gFoot}</div></div>
     </div></div>
     <div class="kpi-stack">
-      <div class="card kpi"><div class="eyebrow">Income \u00B7 ${mName}</div><div class="value pos" data-count="ov-inc" data-v="${c.inc}">${money(c.inc)}</div><div class="sub">${delta(c.inc,pv.inc,true)}</div></div>
-      <div class="card kpi"><div class="eyebrow">Spending \u00B7 ${mName}</div><div class="value neg" data-count="ov-exp" data-v="${-c.exp}">${money(-c.exp)}</div><div class="sub">${delta(c.exp,pv.exp,false)}</div></div>
-      <div class="card kpi"><div class="eyebrow">Net \u00B7 ${mName}</div><div class="value ${c.net<0?'neg':'pos'}" data-count="ov-net" data-v="${c.net}">${money(c.net)}</div><div class="sub">${c.inc>0?'Kept '+Math.round(c.net/c.inc*100)+'% of income':'No income recorded yet'}</div></div>
+      <div class="card kpi"><div class="eyebrow">Income \u00B7 ${mName}</div><div class="value pos" data-count="ov-inc" data-html="1" data-v="${c.inc}">${moneyHTML(c.inc)}</div><div class="sub">${delta(c.inc,pv.inc,true)}</div></div>
+      <div class="card kpi"><div class="eyebrow">Spending \u00B7 ${mName}</div><div class="value neg" data-count="ov-exp" data-html="1" data-v="${-c.exp}">${moneyHTML(-c.exp)}</div><div class="sub">${delta(c.exp,pv.exp,false)}</div></div>
+      <div class="card kpi"><div class="eyebrow">Net \u00B7 ${mName}</div><div class="value ${c.net<0?'neg':'pos'}" data-count="ov-net" data-html="1" data-v="${c.net}">${moneyHTML(c.net)}</div><div class="sub">${c.inc>0?'Kept '+Math.round(c.net/c.inc*100)+'% of income':'No income recorded yet'}</div></div>
     </div>`;
 
   if(!quickForm) quickForm=mountTxForm($('#ov-quick'),'q',newTx());
@@ -1225,8 +1268,8 @@ function buildReport(){
   const inRange=sortTx(S.tx.filter(t=>t.currency===CFG.base&&t.date>=r.start&&t.date<=r.end&&(!R.src||t.sourceId===R.src||t.toSourceId===R.src)&&(!R.cat||t.categoryId===R.cat)));
   const flows=inRange.filter(t=>t.type!=='Transfer');
   let inc=0,exp=0; flows.forEach(t=>{ t.type==='Income'?inc+=t.amount:exp+=t.amount; });
-  const b=buckets(r), bm=new Map(b.list.map(x=>[x.key,{inc:0,exp:0}]));
-  flows.forEach(t=>{ const o=bm.get(b.unit==='month'?t.date.slice(0,7):t.date); if(o){ t.type==='Income'?o.inc+=t.amount:o.exp+=t.amount; } });
+  const b=buckets(r), bm=new Map(b.list.map(x=>[x.key,{inc:0,exp:0,cats:{}}]));
+  flows.forEach(t=>{ const o=bm.get(b.unit==='month'?t.date.slice(0,7):t.date); if(o){ if(t.type==='Income') o.inc+=t.amount; else { o.exp+=t.amount; const k=t.categoryId||''; o.cats[k]=(o.cats[k]||0)+t.amount; } } });
   const meq=monthsEq(r), byCat=new Map();
   flows.forEach(t=>{ const k=t.type+'|'+(t.categoryId||''); byCat.set(k,(byCat.get(k)||0)+t.amount); });
   if(!R.src) S.cats.filter(c=>c.type==='Expense'&&c.budget>0&&c.active&&(!R.cat||R.cat===c.id)).forEach(c=>{ const k='Expense|'+c.id; if(!byCat.has(k)) byCat.set(k,0); });
@@ -1246,7 +1289,7 @@ function renderReport(){
   const rep=buildReport();
   if(R.period==='custom'){ $('#r-from').value=rep.start; $('#r-to').value=rep.end; }
   $('#r-label').textContent=rep.label;
-  const catRow=x=>{ const rem=x.budget!=null?x.budget-x.amount:null; return `<tr><td>${esc(x.name)}</td><td class="r">${money(x.type==='Expense'?-x.amount:x.amount)}</td><td class="r">${(x.share*100).toFixed(1).replace('.',',')}%</td><td class="r">${x.budget!=null?money(x.budget):'<span class="muted">\u2013</span>'}</td><td class="r ${rem!=null&&rem<0?'neg':''}">${rem!=null?money(rem):'<span class="muted">\u2013</span>'}</td></tr>`; };
+  const catRow=x=>{ const rem=x.budget!=null?x.budget-x.amount:null; return `<tr><td>${x.type==='Expense'?`<span class="swatch" style="background:${catColor(x.id)}" aria-hidden="true"></span>`:''}${esc(x.name)}</td><td class="r">${money(x.type==='Expense'?-x.amount:x.amount)}</td><td class="r">${(x.share*100).toFixed(1).replace('.',',')}%</td><td class="r">${x.budget!=null?money(x.budget):'<span class="muted">\u2013</span>'}</td><td class="r ${rem!=null&&rem<0?'neg':''}">${rem!=null?money(rem):'<span class="muted">\u2013</span>'}</td></tr>`; };
   const budgetNote = R.period==='month'?'Budget is the monthly budget.':`Budget is the monthly budget \u00d7 ${rep.meq.toFixed(rep.meq%1?1:0).replace('.',',')} months for this period.`;
   $('#rep-content').innerHTML=`
     <div class="kpis">
@@ -1256,7 +1299,7 @@ function renderReport(){
       <div class="card kpi"><div class="eyebrow">Savings rate</div><div class="value">${rep.inc>0?Math.round(rep.net/rep.inc*100)+'%':'\u2013'}</div><div class="sub">${rep.txs.length} entries \u00b7 ${esc(filterText())}</div></div>
     </div>
     <div class="grid">
-      <div class="card span-7"><div class="card-head"><h2>Income vs spending</h2><span class="muted" style="font-size:13px">by ${rep.unit}</span></div><div class="chart-box"><canvas id="ch-flow" role="img" aria-label="Income and spending by ${rep.unit}"></canvas></div></div>
+      <div class="card span-7"><div class="card-head"><h2>Income vs spending by category</h2><span class="muted" style="font-size:13px">by ${rep.unit}</span></div><div class="chart-box"><canvas id="ch-flow" role="img" aria-label="Income and spending by ${rep.unit}"></canvas></div></div>
       <div class="card span-5"><div class="card-head"><h2>Where the money went</h2></div>${rep.expRows.some(x=>x.amount>0)?`<div class="chart-box" style="height:${Math.max(200,Math.min(10,rep.expRows.filter(x=>x.amount>0).length)*34+40)}px"><canvas id="ch-cat" role="img" aria-label="Spending by category"></canvas></div>`:'<p class="empty">No spending in this period.</p>'}</div>
       <div class="card span-12"><div class="card-head"><div><h2>By category</h2><p class="desc">Transfers between your own sources are left out. ${budgetNote}</p></div></div>
         <div class="tbl-wrap"><table>
@@ -1278,6 +1321,8 @@ function renderReport(){
   drawCharts(rep);
   countUps($('#rep-content'));
 }
+// Each spending category keeps one colour everywhere (its place in the category list), so colours never shift between periods.
+function catColor(id){ const i=S.cats.filter(c=>c.type==='Expense').findIndex(c=>c.id===id); return tok(i>=0&&i<8?'--cat-'+(i+1):'--cat-other'); }
 function drawCharts(rep){
   charts.forEach(c=>c.destroy()); charts=[];
   const C=window.Chart;
@@ -1288,14 +1333,14 @@ function drawCharts(rep){
   const flow=$('#ch-flow');
   if(flow) charts.push(new C(flow,{type:'bar',
     data:{labels:rep.buckets.map(b=>b.label),datasets:[
-      {label:'Income',data:rep.buckets.map(b=>b.inc),backgroundColor:tok('--chart-in'),borderRadius:3,maxBarThickness:22},
-      {label:'Spending',data:rep.buckets.map(b=>b.exp),backgroundColor:tok('--chart-out'),borderRadius:3,maxBarThickness:22}]},
+      {label:'Income',data:rep.buckets.map(b=>b.inc),backgroundColor:tok('--ink'),borderRadius:4,maxBarThickness:22,stack:'in'},
+      ...rep.expRows.filter(x=>x.amount>0).map(x=>({label:x.name,data:rep.buckets.map(b=>b.cats[x.id]||0),backgroundColor:catColor(x.id),borderColor:tok('--surface'),borderWidth:{top:1},borderSkipped:'bottom',borderRadius:2,maxBarThickness:22,stack:'out'}))]},
     options:{responsive:true,maintainAspectRatio:false,animation:reduce?false:{duration:300},interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,color:ink}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.parsed.y)}}},
-      scales:{x:{grid:{display:false},ticks:{color:muted,maxRotation:0,autoSkip:true,autoSkipPadding:8}},y:{beginAtZero:true,grid:{color:line},border:{display:false},ticks:{color:muted,callback:v=>compact(v),maxTicksLimit:6}}}}}));
+      plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,color:ink}},tooltip:{filter:i=>i.parsed.y>0,callbacks:{label:c=>c.dataset.label+': '+money(c.parsed.y)}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:muted,maxRotation:0,autoSkip:true,autoSkipPadding:8}},y:{stacked:true,beginAtZero:true,grid:{color:line},border:{display:false},ticks:{color:muted,callback:v=>compact(v),maxTicksLimit:6}}}}}));
   const cat=$('#ch-cat');
   if(cat){ const top=rep.expRows.filter(x=>x.amount>0).slice(0,10);
-    charts.push(new C(cat,{type:'bar',data:{labels:top.map(x=>x.name),datasets:[{label:'Spending',data:top.map(x=>x.amount),backgroundColor:tok('--chart-cat'),borderRadius:3,maxBarThickness:20}]},
+    charts.push(new C(cat,{type:'bar',data:{labels:top.map(x=>x.name),datasets:[{label:'Spending',data:top.map(x=>x.amount),backgroundColor:top.map(x=>catColor(x.id)),borderRadius:4,maxBarThickness:20}]},
       options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,animation:reduce?false:{duration:300},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.parsed.x)}}},
         scales:{x:{beginAtZero:true,grid:{color:line},border:{display:false},ticks:{color:muted,callback:v=>compact(v),maxTicksLimit:5}},y:{grid:{display:false},ticks:{color:ink}}}}})); }
 }
