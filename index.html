@@ -3,8 +3,8 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Personal budget planner and money tracker in Rupiah, synced with your Google Sheet.">
-<meta name="theme-color" content="#22A6B3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1226" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F1F1EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -19,7 +19,7 @@
 <title>Money Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap">
 <style>
 /* Liquid layout. Phone (<760px): glass header + floating glass tab bar + bottom sheets.
    Tablet (760-1099px): header with sliding tab underline. Desktop (>=1100px): fixed navigation rail. */
@@ -363,6 +363,158 @@ dialog[open]::backdrop{animation:fadeIn .26s var(--ease)}
 @keyframes sheetIn{from{transform:translateY(100%)}to{transform:none}}
 body[data-gate] .rail-nav,body[data-gate] .rail-add,body[data-gate] .rail-hint,body[data-gate] .tabbar,body[data-gate] .page-title{display:none!important}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- MODERN (v13): airy canvas, borderless cards, thin big numerals, gauge hero ---- */
+/* --bar-*: phone tab bar, dark navy in both themes */
+:root{--bar-bg:#130F40;--bar-fg:#EEF3F5;--bar-line:transparent}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bar-bg:#1F2542;--bar-fg:#DFF9FB;--bar-line:#343C66}}
+:root[data-theme="dark"]{--bar-bg:#1F2542;--bar-fg:#DFF9FB;--bar-line:#343C66}
+:root{--bg:#EEF3F5;--font-display:"Manrope",system-ui,sans-serif;--radius:22px}
+body::before{background:var(--bg)}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em}
+.card{border:0;padding:20px 22px}
+.card h2{font-size:16.5px;font-weight:700}
+.btn{border-radius:12px}
+.btn.sm{border-radius:10px}
+input,select{border-radius:12px;min-height:44px;background:var(--surface)}
+.amount-wrap{border-radius:14px}
+.seg{border-radius:13px}.seg span,.seg>button{border-radius:10px}
+.txform .seg::before{border-radius:10px}
+.eyebrow{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600}
+.field>label,.flabel{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600}
+th,.mhead span{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600}
+.brand-mark{border-radius:10px;background:var(--ink);color:var(--bg)}
+.who{background:var(--surface)}
+.sync{background:var(--surface)}
+.banner{border:0;border-radius:16px}
+dialog{border-radius:22px}
+.cur{font-size:.5em;font-weight:500;letter-spacing:0;margin-right:.3em;vertical-align:.62em;color:var(--muted)}
+/* header search */
+.top-search{display:none}
+@media (min-width:760px){
+  .top-search{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:14px;padding:0 12px;min-height:42px;width:clamp(180px,22vw,300px);color:var(--muted)}
+  .top-search:focus-within{outline:2px solid var(--accent);outline-offset:-1px}
+  .top-search input{border:0;background:transparent;min-height:40px;padding:0;outline:none}
+  .top-search .ico{width:18px;height:18px}
+}
+/* overview top: hero + stat tiles */
+.ov-top{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.ov-top{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+.hero-card{container-type:inline-size;background:linear-gradient(180deg,var(--surface) 55%,color-mix(in srgb,var(--accent-soft) 55%,var(--surface)));padding:22px 24px}
+.hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,250px);gap:8px 20px;align-items:center;height:100%}
+.hero-bal .value{font-weight:300;font-size:clamp(30px,6.8cqi,54px);line-height:1.05;letter-spacing:-.035em;font-variant-numeric:tabular-nums;margin:6px 0 8px;white-space:nowrap}
+.hero-bal .sub{font-size:13.5px;color:var(--muted)}
+.gauge{position:relative;width:100%;max-width:250px;justify-self:center}
+.gauge svg{display:block;width:100%;height:auto;overflow:visible}
+.gauge .g-track{stroke:var(--line)}
+.gauge .g-tick{stroke:var(--muted);opacity:.45}
+.gauge .g-knob{fill:var(--surface);stroke:var(--ink)}
+.gauge[data-state="ok"] .g-val{stroke:var(--accent)}
+.gauge[data-state="warn"] .g-val{stroke:var(--chart-warn)}
+.gauge[data-state="over"] .g-val{stroke:var(--chart-out)}
+.g-mid{position:absolute;inset:26% 0 auto;text-align:center}
+.g-pct{font-weight:300;font-size:clamp(38px,13cqi,52px);line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.g-pct small{font-size:.45em;font-weight:500;letter-spacing:0;margin-left:2px}
+.g-lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
+.g-foot{text-align:center;font-size:12.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+@container (max-width:560px){.hero-in{grid-template-columns:minmax(0,1fr)}.gauge{margin-top:8px}.hero-bal .value{font-size:clamp(30px,11.5cqi,52px)}}
+.kpi-stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.kpi-stack .kpi{padding:16px 20px;display:grid;align-content:center}
+.kpi-stack .kpi .value{font-weight:600;font-size:clamp(19px,2vw,24px);letter-spacing:-.02em}
+.delta{display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:12.5px}
+.delta.good{color:var(--income)}.delta.bad{color:var(--expense)}.delta.flat{color:var(--muted);font-weight:600}
+.delta .tri{font-size:9px}
+/* balances become tiles */
+#ov-balances{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+#ov-balances .bal{flex-direction:column;align-items:flex-start;gap:6px;border:0;background:var(--surface-2);border-radius:16px;padding:12px 14px}
+#ov-balances .bal-amt{font-size:17px;font-weight:700}
+#ov-balances .bal.total{grid-column:1/-1;flex-direction:row;align-items:center;background:transparent;border-top:1px solid var(--line);border-radius:0;margin:4px 0 0;padding:12px 2px 0}
+/* desktop rail: filled active item */
+@media (min-width:1100px){
+  .rail{background:var(--bg);border-right:0}
+  .rail-nav .nav-ind{background:var(--ink);border-radius:14px}
+  .rail-nav a{border-radius:14px}
+  .rail-nav a[aria-current="page"]{color:var(--bg);font-weight:700}
+  .rail-nav a[aria-current="page"] kbd{color:var(--bg);border-color:transparent;background:transparent}
+  .rail-add{border-radius:14px}
+  .rail-group{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600}
+}
+/* phone: solid header, dark pill tab bar */
+@media (max-width:759px){
+  header.top{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent}
+  .tabbar{background:var(--bar-bg);border:1px solid var(--bar-line);border-radius:28px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 10px 28px rgba(19,15,64,.22)}
+  .tabbar a{color:color-mix(in srgb,var(--bar-fg) 68%,transparent);border-radius:22px}
+  .tabbar a[aria-current="page"]{color:var(--bar-fg)}
+  .tabbar .nav-ind{background:color-mix(in srgb,var(--bar-fg) 14%,transparent);border-radius:22px}
+  .tab-add{border-radius:50%;box-shadow:none}
+  .card{padding:18px}
+  .hero-card{padding:20px}
+  .kpi-stack{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi-stack .kpi:nth-child(3){grid-column:1/-1}
+  .kpi-stack .kpi{padding:14px 16px}
+  .ov-top{gap:10px}
+  .gauge{max-width:215px}
+}
+
+/* ---- REFERENCE PALETTE (trial): warm off-white, near-black ink, coral brand, green gauge ---- */
+:root{
+  --bg:#F1F1EE; --surface:#FFFFFF; --surface-2:#F5F5F2; --ink:#141414; --muted:#5F5F5C; --line:#E4E4E0;
+  --accent:#D7351F; --accent-ink:#FFFFFF; --accent-soft:#FCE9E6; --accent-text:#B42318;
+  --brand:#141414; --brand-ink:#FFFFFF;
+  --income:#1E7F33; --expense:#B42318; --transfer:#4B4FC9; --warn:#8A5300;
+  --income-soft:#E6F5E8; --expense-soft:#FCE9E6; --warn-soft:#FBF1D9; --on-expense:#FFFFFF;
+  --chart-in:#2DB83D; --chart-out:#F0412F; --chart-cat:#3A3A38; --chart-warn:#F59E0B;
+  --hero-wash:#E9F6EB;
+  --bar-bg:#FFFFFF; --bar-fg:#141414; --bar-line:#E4E4E0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101010; --surface:#1A1A1A; --surface-2:#232323; --ink:#F2F2EF; --muted:#A6A6A1; --line:#2E2E2C;
+    --accent:#FF6B57; --accent-ink:#141414; --accent-soft:#3A1E1A; --accent-text:#FF8A78;
+    --brand:#F2F2EF; --brand-ink:#141414;
+    --income:#5FD36F; --expense:#FF7B6B; --transfer:#A3A6FF; --warn:#F5B94A;
+    --income-soft:#18301C; --expense-soft:#3A1E1A; --warn-soft:#3A2E14; --on-expense:#141414;
+    --chart-in:#4CC95C; --chart-out:#FF6B57; --chart-cat:#D6D6D2; --chart-warn:#F5B94A;
+    --hero-wash:#16261A;
+    --bar-bg:#1A1A1A; --bar-fg:#F2F2EF; --bar-line:#2E2E2C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101010; --surface:#1A1A1A; --surface-2:#232323; --ink:#F2F2EF; --muted:#A6A6A1; --line:#2E2E2C;
+  --accent:#FF6B57; --accent-ink:#141414; --accent-soft:#3A1E1A; --accent-text:#FF8A78;
+  --brand:#F2F2EF; --brand-ink:#141414;
+  --income:#5FD36F; --expense:#FF7B6B; --transfer:#A3A6FF; --warn:#F5B94A;
+  --income-soft:#18301C; --expense-soft:#3A1E1A; --warn-soft:#3A2E14; --on-expense:#141414;
+  --chart-in:#4CC95C; --chart-out:#FF6B57; --chart-cat:#D6D6D2; --chart-warn:#F5B94A;
+  --hero-wash:#16261A;
+  --bar-bg:#1A1A1A; --bar-fg:#F2F2EF; --bar-line:#2E2E2C;
+}
+/* coral marks the brand and where you are; black is the main action; green is money doing well */
+.brand-mark{background:var(--accent);color:var(--accent-ink)}
+.who-av{background:var(--accent);color:var(--accent-ink)}
+.btn.primary,.btn.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--surface);filter:none}
+.btn.primary:hover{opacity:.88}
+.rail-add kbd{color:var(--surface);border-color:color-mix(in srgb,var(--surface) 40%,transparent)}
+.tab-add{background:var(--ink);color:var(--surface)}
+input:focus,select:focus{outline-color:var(--ink)}
+.amount-wrap:focus-within,.top-search:focus-within{outline-color:var(--ink)}
+:focus-visible{outline-color:var(--ink)}
+.bar>i{background:var(--chart-in)}
+.hero-card{background:linear-gradient(180deg,var(--surface) 50%,var(--hero-wash))}
+.gauge[data-state="ok"] .g-val{stroke:var(--chart-in)}
+.gauge .g-knob{stroke:var(--ink)}
+nav.tabs .nav-ind{background:var(--accent)}
+@media (min-width:1100px){
+  .rail-nav .nav-ind{background:var(--accent)}
+  .rail-nav a[aria-current="page"]{color:var(--accent-ink)}
+  .rail-nav a[aria-current="page"] kbd{color:var(--accent-ink)}
+}
+@media (max-width:759px){
+  .tabbar{box-shadow:0 10px 28px rgba(20,20,20,.12)}
+  .tabbar a{color:var(--muted)}
+  .tabbar a[aria-current="page"]{color:var(--accent-ink)}
+  .tabbar .nav-ind{background:var(--accent)}
+}
 /* RECEIPTS:CSS (from trial/receipt.css) */
 /* Money Tracker - "Scan receipt" styles (trial). Uses the page's colour tokens. */
 .scan-bar{display:grid;gap:10px;padding:10px 12px;border:1.5px dashed var(--line);border-radius:12px;background:var(--surface-2);transition:border-color .2s,background-color .2s}
@@ -426,6 +578,7 @@ body[data-gate] .rail-nav,body[data-gate] .rail-add,body[data-gate] .rail-hint,b
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="2.6"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16v-5M11 16V6M16 16v-8M21 16v-3"/></symbol>
   <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 7l11-3v3"/><path d="M16 13.5h.01" stroke-width="2.8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/><path d="M15.5 10l-2 2 2 2"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></symbol>
@@ -457,6 +610,7 @@ body[data-gate] .rail-nav,body[data-gate] .rail-add,body[data-gate] .rail-hint,b
       <h1 class="page-title" id="page-title">Overview</h1>
       <span class="sync" id="sync" data-state="loading"><span class="dot"></span><span id="sync-text">Connecting to Google Sheet&#x2026;</span></span>
       <div class="top-actions">
+        <label class="top-search"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="top-q" type="search" placeholder="Search entries" aria-label="Search entries" autocomplete="off"></label>
         <span class="who" id="who" hidden title=""><span class="who-av" id="who-av" aria-hidden="true"></span><span id="who-name"></span></span>
         <button class="btn ghost sm" id="btn-refresh" type="button" title="Reload everything from Google Sheet">
           <svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg><span class="lbl">Refresh</span></button>
@@ -480,7 +634,7 @@ body[data-gate] .rail-nav,body[data-gate] .rail-add,body[data-gate] .rail-hint,b
   <div id="banner"></div>
 
   <section class="view" id="view-overview" aria-label="Overview">
-    <div class="kpis" id="ov-kpis"></div>
+    <div class="ov-top" id="ov-kpis"></div>
     <div class="grid">
       <div class="card span-5 quick-card">
         <div class="card-head"><div><h2>Quick entry</h2><p class="desc">Saved straight to your Google Sheet.</p></div></div>
@@ -553,7 +707,7 @@ body[data-gate] .rail-nav,body[data-gate] .rail-add,body[data-gate] .rail-hint,b
     <div id="manage-content" class="view"></div>
   </section>
 </main>
-<footer class="wrap app-version">Money Tracker &middot; app 1</footer>
+<footer class="wrap app-version">Money Tracker &middot; app 2</footer>
 </div>
 </div>
 
@@ -609,6 +763,18 @@ const cur = code=>CURRENCIES[code]||CURRENCIES[CFG.base];
 
 function fmtNum(n, code){ const c=cur(code); return new Intl.NumberFormat(c.locale,{minimumFractionDigits:c.decimals,maximumFractionDigits:c.decimals}).format(Math.abs(n)); }
 // Accounting style: negatives in parentheses, e.g. (Rp 250.000)
+function moneyHTML(n, code){ return esc(money(n,code)).replace(/^(\(?)(\S+) /,'$1<span class="cur">$2</span>'); }
+function gaugeSVG(pct){
+  // 240-degree arc, open at the bottom; value drawn with pathLength 100.
+  const p=Math.max(0,Math.min(100,pct||0)), cx=100, cy=100, r=80, a0=150, sweep=240;
+  const pt=(deg,rr)=>{ const t=deg*Math.PI/180; return [(cx+rr*Math.cos(t)).toFixed(2),(cy+rr*Math.sin(t)).toFixed(2)]; };
+  const s=pt(a0,r), e=pt(a0+sweep,r), k=pt(a0+sweep*p/100,r);
+  const arc=`M${s[0]} ${s[1]} A${r} ${r} 0 1 1 ${e[0]} ${e[1]}`;
+  let ticks=''; for(let i=0;i<=4;i++){ const d=a0+sweep*i/4, o=pt(d,r+15), n=pt(d,r+10); ticks+=`<path class="g-tick" d="M${n[0]} ${n[1]}L${o[0]} ${o[1]}" stroke-width="2" stroke-linecap="round"/>`; }
+  return `<svg viewBox="0 0 200 160" aria-hidden="true">${ticks}<path class="g-track" d="${arc}" fill="none" stroke-width="10" stroke-linecap="round"/>`
+    + (p>0?`<path class="g-val" d="${arc}" fill="none" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="${p.toFixed(2)} 200"/>`:'')
+    + `<circle class="g-knob" cx="${k[0]}" cy="${k[1]}" r="7" stroke-width="3"/></svg>`;
+}
 function money(n, code){ const c=cur(code||CFG.base); const v=Math.round(n*10**c.decimals)/10**c.decimals; const s=c.symbol+' '+fmtNum(v,c.code); return v<0 ? '('+s+')' : s; }
 function compact(n){
   const a=Math.abs(n), sign=n<0?'-':''; const f=v=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:1}).format(v);
@@ -946,11 +1112,26 @@ function renderOverview(){
   const c=sumRange(ms,me), pv=sumRange(prevS,prevE);
   const bal=balances(); const total=S.sources.reduce((a,s)=>a+(bal.get(s.id)||0),0);
   const mName=MONTH[+today.slice(5,7)-1], pName=MONTH[+prevS.slice(5,7)-1];
+  const nAct=S.sources.filter(s=>s.active).length;
+  const tri=(up,good)=>`<span class="delta ${good?'good':'bad'}"><span class="tri" aria-hidden="true">${up?'\u25B2':'\u25BC'}</span><span class="sr-only">${up?'up':'down'}</span>`;
+  const delta=(cv,pvv,upIsGood)=>{ if(!pvv) return `<span class="delta flat">No ${pName} data yet</span>`; const d=Math.round((cv-pvv)/Math.abs(pvv)*100); if(!d) return `<span class="delta flat">Same as ${pName}</span>`; return tri(d>0,(d>0)===upIsGood)+Math.abs(d)+'%</span> <span class="muted">vs '+pName+'</span>'; };
+  const budTotal=S.cats.filter(x=>x.type==='Expense'&&x.budget>0&&x.active).reduce((a,x)=>a+x.budget,0);
+  let gBase=0, gLbl='';
+  if(c.inc>0){ gBase=c.inc; gLbl='of '+mName+' income spent'; } else if(budTotal>0){ gBase=budTotal; gLbl='of '+mName+' budget used'; }
+  const gPct=gBase?c.exp/gBase*100:0, gState=gPct>100?'over':gPct>=80?'warn':'ok';
+  const gFoot=gBase?money(c.exp)+' of '+money(gBase):(c.exp?money(c.exp)+' spent, no income yet':'Nothing recorded in '+mName+' yet');
   $('#ov-kpis').innerHTML=`
-    <div class="card kpi hero"><div class="eyebrow">Total balance</div><div class="value" data-count="ov-total" data-v="${total}">${money(total)}</div><div class="sub">Across ${S.sources.filter(s=>s.active).length} active sources</div></div>
-    <div class="card kpi"><div class="eyebrow">Income \u00b7 ${mName}</div><div class="value pos" data-count="ov-inc" data-v="${c.inc}">${money(c.inc)}</div><div class="sub">${pName}: ${money(pv.inc)}</div></div>
-    <div class="card kpi"><div class="eyebrow">Spending \u00b7 ${mName}</div><div class="value neg" data-count="ov-exp" data-v="${-c.exp}">${money(-c.exp)}</div><div class="sub">${pName}: ${money(-pv.exp)}</div></div>
-    <div class="card kpi"><div class="eyebrow">Net \u00b7 ${mName}</div><div class="value ${c.net<0?'neg':'pos'}" data-count="ov-net" data-v="${c.net}">${money(c.net)}</div><div class="sub">${c.inc>0?'Kept '+Math.round(c.net/c.inc*100)+'% of income':'No income recorded yet'}</div></div>`;
+    <div class="card hero-card"><div class="hero-in">
+      <div class="hero-bal"><div class="eyebrow">Total balance</div><div class="value ${total<0?'neg':''}" data-count="ov-total" data-html="1" data-v="${total}">${moneyHTML(total)}</div><div class="sub">Across ${nAct} active source${nAct===1?'':'s'}</div></div>
+      <div class="gauge" data-state="${gState}">${gaugeSVG(gBase?gPct:0)}
+        <div class="g-mid"><div class="g-pct">${gBase?Math.round(gPct):'\u2013'}${gBase?'<small>%</small>':''}</div><div class="g-lbl">${gBase?gLbl:'Spent this month'}</div></div>
+        <div class="g-foot">${gFoot}</div></div>
+    </div></div>
+    <div class="kpi-stack">
+      <div class="card kpi"><div class="eyebrow">Income \u00B7 ${mName}</div><div class="value pos" data-count="ov-inc" data-v="${c.inc}">${money(c.inc)}</div><div class="sub">${delta(c.inc,pv.inc,true)}</div></div>
+      <div class="card kpi"><div class="eyebrow">Spending \u00B7 ${mName}</div><div class="value neg" data-count="ov-exp" data-v="${-c.exp}">${money(-c.exp)}</div><div class="sub">${delta(c.exp,pv.exp,false)}</div></div>
+      <div class="card kpi"><div class="eyebrow">Net \u00B7 ${mName}</div><div class="value ${c.net<0?'neg':'pos'}" data-count="ov-net" data-v="${c.net}">${money(c.net)}</div><div class="sub">${c.inc>0?'Kept '+Math.round(c.net/c.inc*100)+'% of income':'No income recorded yet'}</div></div>
+    </div>`;
 
   if(!quickForm) quickForm=mountTxForm($('#ov-quick'),'q',newTx());
   else quickForm.refresh();
@@ -1243,7 +1424,7 @@ function renderAll(){
   if(S.mode==='loading'||S.mode==='error'){
     const msg=S.mode==='loading'?'<h2>Connecting to your Google Sheet\u2026</h2><p>Your balances, budgets and entries will appear here in a moment.</p>':'<h2>Not connected yet</h2><p>Your balances, budgets and entries will appear here once Google Sheets answers. See the message above.</p>';
     $('#ov-kpis').innerHTML = S.mode==='loading'
-      ? Array.from({length:4},()=>'<div class="card kpi skel" aria-hidden="true"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div>').join('')+'<p class="sr-only" role="status">Loading your sheet\u2026</p>'
+      ? '<div class="card hero-card skel" aria-hidden="true"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div><div class="kpi-stack">'+Array.from({length:3},()=>'<div class="card kpi skel" aria-hidden="true"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div>').join('')+'</div><p class="sr-only" role="status">Loading your sheet\u2026</p>'
       : `<div class="card loading-state" style="grid-column:1/-1">${msg}</div>`;
     return;
   }
@@ -1252,6 +1433,9 @@ function renderAll(){
 }
 try{ const hh=gHistory(); if(hh) hh.setChangeHandler(ev=>route((ev&&ev.state&&ev.state.view)||'overview')); }catch(e){}
 $('#btn-add').onclick=()=>openTxDialog(newTx());
+$('#top-q').addEventListener('input',e=>{ const f=$('#f-q'); f.value=e.target.value; f.dispatchEvent(new Event('input')); if(current!=='transactions') go('transactions'); });
+$('#top-q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); const box=$('#filter-box'); if(box) box.open=true; } });
+$('#f-q').addEventListener('input',()=>{ const t=$('#top-q'); if(t.value!==$('#f-q').value) t.value=$('#f-q').value; });
 $('#rail-add').onclick=()=>openTxDialog(newTx());
 // Desktop sidebar: collapse to icons and back; remembered on this device.
 function setRail(collapsed, save){
@@ -1291,7 +1475,7 @@ function countUps(root){
     const k=el.dataset.count, to=Number(el.dataset.v), from=lastVals[k]; lastVals[k]=to;
     if(from==null||from===to||reduce||!isFinite(to)) return;
     const t0=performance.now(), d=650;
-    const step=now=>{ const p=Math.min(1,(now-t0)/d), e=1-Math.pow(1-p,3); el.textContent=money(p<1?from+(to-from)*e:to); if(p<1) requestAnimationFrame(step); };
+    const step=now=>{ const p=Math.min(1,(now-t0)/d), e=1-Math.pow(1-p,3); const vv=p<1?from+(to-from)*e:to; if(el.dataset.html) el.innerHTML=moneyHTML(vv); else el.textContent=money(vv); if(p<1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   });
 }
