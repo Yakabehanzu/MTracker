@@ -1,0 +1,19 @@
+{
+  "name": "Money Tracker",
+  "short_name": "Money Tracker",
+  "description": "Personal budget planner and money tracker in Rupiah, synced with your Google Sheet.",
+  "id": "/MTracker/",
+  "start_url": "/MTracker/",
+  "scope": "/MTracker/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F5FAFB",
+  "theme_color": "#22A6B3",
+  "lang": "en",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

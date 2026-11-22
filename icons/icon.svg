@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#30336B"/>
+  <rect x="152" y="152" width="720" height="720" rx="168" fill="#22A6B3"/>
+  <text x="512" y="610" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="800" font-size="330" fill="#130F40" letter-spacing="-6">Rp</text>
+</svg>
