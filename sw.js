@@ -3,7 +3,7 @@
  * Keeps the app itself on the device so it opens instantly and installs as an app.
  * Your data is never cached here: Google sign-in and the Sheets/Drive calls always go to Google.
  */
-const VERSION = 'mt-2.1';
+const VERSION = 'mt-2.2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './config.js', './backend.js', './app-shell.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/icon-32.png'];
 const CDN = /^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;

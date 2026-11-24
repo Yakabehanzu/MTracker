@@ -723,7 +723,7 @@ dialog::backdrop{background:rgba(10,10,10,.28);-webkit-backdrop-filter:blur(4px)
       <div class="rep-controls">
         <div class="field"><span class="flabel">Period</span>
           <div class="seg" id="r-period" role="group" aria-label="Report period">
-            <button type="button" data-p="week">Week</button><button type="button" data-p="month">Month</button><button type="button" data-p="half">6 months</button><button type="button" data-p="year">Year</button><button type="button" data-p="custom">Custom</button>
+            <button type="button" data-p="day">Day</button><button type="button" data-p="week">Week</button><button type="button" data-p="month">Month</button><button type="button" data-p="half">6 months</button><button type="button" data-p="year">Year</button><button type="button" data-p="custom">Custom</button>
           </div>
         </div>
         <div class="stepper" id="r-stepper">
@@ -750,7 +750,7 @@ dialog::backdrop{background:rgba(10,10,10,.28);-webkit-backdrop-filter:blur(4px)
     <div id="manage-content" class="view"></div>
   </section>
 </main>
-<footer class="wrap app-version">Money Tracker &middot; app 2.1</footer>
+<footer class="wrap app-version">Money Tracker &middot; app 2.2</footer>
 </div>
 </div>
 
@@ -1235,6 +1235,7 @@ const R={ period:store.get('period')||'month', anchor:todayStr(), from:'', to:''
 function periodRange(){
   const a=R.anchor;
   switch(R.period){
+    case 'day': return {start:a, end:a};
     case 'week': { const dow=(toD(a).getUTCDay()+6)%7, s=addDays(a,-dow); return {start:s,end:addDays(s,6)}; }
     case 'half': return {start:monthStart(addMonths(monthStart(a),-5)), end:monthEnd(a)};
     case 'year': return {start:a.slice(0,4)+'-01-01', end:a.slice(0,4)+'-12-31'};
@@ -1246,13 +1247,14 @@ function periodLabel(r){
   const sm=+r.start.slice(5,7)-1, em=+r.end.slice(5,7)-1;
   switch(R.period){
     case 'week': return r.start.slice(0,7)===r.end.slice(0,7) ? `${+r.start.slice(8)}\u2013${+r.end.slice(8)} ${MON[em]} ${r.end.slice(0,4)}` : `${fmtDate(r.start)} \u2013 ${fmtDate(r.end)}`;
+    case 'day': { const t=todayStr(), w=DOW[(toD(r.start).getUTCDay()+6)%7]; return (r.start===t?'Today':r.start===addDays(t,-1)?'Yesterday':w)+', '+fmtDate(r.start); }
     case 'month': return MONTH[sm]+' '+r.start.slice(0,4);
     case 'half': return `${MON[sm]} ${r.start.slice(0,4)} \u2013 ${MON[em]} ${r.end.slice(0,4)}`;
     case 'year': return r.start.slice(0,4);
     default: return `${fmtDate(r.start)} \u2013 ${fmtDate(r.end)}`;
   }
 }
-const periodName={week:'Weekly',month:'Monthly',half:'6-month',year:'Yearly',custom:'Custom'};
+const periodName={day:'Daily',week:'Weekly',month:'Monthly',half:'6-month',year:'Yearly',custom:'Custom'};
 function monthsEq(r){ return R.period==='month'?1:R.period==='half'?6:R.period==='year'?12:daysBetween(r.start,r.end)/30.44; }
 function buckets(r){
   const days=daysBetween(r.start,r.end);
@@ -1260,7 +1262,7 @@ function buckets(r){
     const out=[]; for(let m=monthStart(r.start); m<=r.end; m=addMonths(m,1)) out.push({key:m.slice(0,7), label:MON[+m.slice(5,7)-1]+(R.period==='year'?'':" \u2019"+m.slice(2,4))});
     return {unit:'month', list:out};
   }
-  const out=[]; for(let d=r.start; d<=r.end; d=addDays(d,1)) out.push({key:d, label:R.period==='week'?DOW[(toD(d).getUTCDay()+6)%7]+' '+(+d.slice(8)):String(+d.slice(8))});
+  const out=[]; for(let d=r.start; d<=r.end; d=addDays(d,1)) out.push({key:d, label:(R.period==='week'||R.period==='day')?DOW[(toD(d).getUTCDay()+6)%7]+' '+(+d.slice(8)):String(+d.slice(8))});
   return {unit:'day', list:out};
 }
 function buildReport(){
@@ -1268,15 +1270,18 @@ function buildReport(){
   const inRange=sortTx(S.tx.filter(t=>t.currency===CFG.base&&t.date>=r.start&&t.date<=r.end&&(!R.src||t.sourceId===R.src||t.toSourceId===R.src)&&(!R.cat||t.categoryId===R.cat)));
   const flows=inRange.filter(t=>t.type!=='Transfer');
   let inc=0,exp=0; flows.forEach(t=>{ t.type==='Income'?inc+=t.amount:exp+=t.amount; });
-  const b=buckets(r), bm=new Map(b.list.map(x=>[x.key,{inc:0,exp:0,cats:{}}]));
-  flows.forEach(t=>{ const o=bm.get(b.unit==='month'?t.date.slice(0,7):t.date); if(o){ if(t.type==='Income') o.inc+=t.amount; else { o.exp+=t.amount; const k=t.categoryId||''; o.cats[k]=(o.cats[k]||0)+t.amount; } } });
+  const isDay=R.period==='day', cr=isDay?{start:addDays(r.start,-6),end:r.end}:r;
+  const chartFlows=isDay?S.tx.filter(t=>t.type!=='Transfer'&&t.currency===CFG.base&&t.date>=cr.start&&t.date<=cr.end&&(!R.src||t.sourceId===R.src||t.toSourceId===R.src)&&(!R.cat||t.categoryId===R.cat)):flows;
+  const b=buckets(cr), bm=new Map(b.list.map(x=>[x.key,{inc:0,exp:0,cats:{}}]));
+  chartFlows.forEach(t=>{ const o=bm.get(b.unit==='month'?t.date.slice(0,7):t.date); if(o){ if(t.type==='Income') o.inc+=t.amount; else { o.exp+=t.amount; const k=t.categoryId||''; o.cats[k]=(o.cats[k]||0)+t.amount; } } });
   const meq=monthsEq(r), byCat=new Map();
   flows.forEach(t=>{ const k=t.type+'|'+(t.categoryId||''); byCat.set(k,(byCat.get(k)||0)+t.amount); });
   if(!R.src) S.cats.filter(c=>c.type==='Expense'&&c.budget>0&&c.active&&(!R.cat||R.cat===c.id)).forEach(c=>{ const k='Expense|'+c.id; if(!byCat.has(k)) byCat.set(k,0); });
   const rows=[...byCat.entries()].map(([k,amount])=>{ const [type,id]=k.split('|'); const c=catById(id); const budget=type==='Expense'&&c&&c.budget>0?c.budget*meq:null; return {id,type,name:catName(id),amount,budget,share:(type==='Income'?inc:exp)?amount/(type==='Income'?inc:exp):0}; });
+  const chartCats=[...new Set(chartFlows.filter(t=>t.type==='Expense').map(t=>t.categoryId||''))].map(id=>({id,name:catName(id)}));
   const expRows=rows.filter(x=>x.type==='Expense').sort((a,b)=>b.amount-a.amount), incRows=rows.filter(x=>x.type==='Income').sort((a,b)=>b.amount-a.amount);
   const elapsedEnd=r.end<today?r.end:today; const elapsed=elapsedEnd>=r.start?daysBetween(r.start,elapsedEnd):0;
-  return {...r, label:periodLabel(r), inc, exp, net:inc-exp, buckets:b.list.map(x=>({...x,...bm.get(x.key)})), unit:b.unit, expRows, incRows, txs:inRange, avgDay:elapsed?exp/elapsed:0, elapsed, meq};
+  return {...r, label:periodLabel(r), inc, exp, net:inc-exp, buckets:b.list.map(x=>({...x,...bm.get(x.key),sel:isDay&&x.key===r.start})), unit:b.unit, isDay, chartCats, avg7:isDay?b.list.reduce((a,x)=>a+bm.get(x.key).exp,0)/7:0, expRows, incRows, txs:inRange, avgDay:elapsed?exp/elapsed:0, elapsed, meq};
 }
 function filterText(){ return [R.cat?'Category: '+catName(R.cat):'All categories', R.src?'Source: '+srcName(R.src):'All sources'].join(' \u00b7 '); }
 
@@ -1290,16 +1295,16 @@ function renderReport(){
   if(R.period==='custom'){ $('#r-from').value=rep.start; $('#r-to').value=rep.end; }
   $('#r-label').textContent=rep.label;
   const catRow=x=>{ const rem=x.budget!=null?x.budget-x.amount:null; return `<tr><td>${x.type==='Expense'?`<span class="swatch" style="background:${catColor(x.id)}" aria-hidden="true"></span>`:''}${esc(x.name)}</td><td class="r">${money(x.type==='Expense'?-x.amount:x.amount)}</td><td class="r">${(x.share*100).toFixed(1).replace('.',',')}%</td><td class="r">${x.budget!=null?money(x.budget):'<span class="muted">\u2013</span>'}</td><td class="r ${rem!=null&&rem<0?'neg':''}">${rem!=null?money(rem):'<span class="muted">\u2013</span>'}</td></tr>`; };
-  const budgetNote = R.period==='month'?'Budget is the monthly budget.':`Budget is the monthly budget \u00d7 ${rep.meq.toFixed(rep.meq%1?1:0).replace('.',',')} months for this period.`;
+  const budgetNote = R.period==='month'?'Budget is the monthly budget.':R.period==='day'?'Budget is one day\u2019s share of the monthly budget.':`Budget is the monthly budget \u00d7 ${rep.meq.toFixed(rep.meq%1?1:0).replace('.',',')} months for this period.`;
   $('#rep-content').innerHTML=`
     <div class="kpis">
       <div class="card kpi"><div class="eyebrow">Income</div><div class="value pos" data-count="rep-inc" data-v="${rep.inc}">${money(rep.inc)}</div><div class="sub">${rep.label}</div></div>
-      <div class="card kpi"><div class="eyebrow">Spending</div><div class="value neg" data-count="rep-exp" data-v="${-rep.exp}">${money(-rep.exp)}</div><div class="sub">${rep.elapsed?money(rep.avgDay)+' per day on average':'Period hasn\u2019t started'}</div></div>
+      <div class="card kpi"><div class="eyebrow">Spending</div><div class="value neg" data-count="rep-exp" data-v="${-rep.exp}">${money(-rep.exp)}</div><div class="sub">${rep.isDay?'7-day average '+money(rep.avg7):rep.elapsed?money(rep.avgDay)+' per day on average':'Period hasn\u2019t started'}</div></div>
       <div class="card kpi"><div class="eyebrow">Net</div><div class="value ${rep.net<0?'neg':'pos'}" data-count="rep-net" data-v="${rep.net}">${money(rep.net)}</div><div class="sub">Income minus spending</div></div>
       <div class="card kpi"><div class="eyebrow">Savings rate</div><div class="value">${rep.inc>0?Math.round(rep.net/rep.inc*100)+'%':'\u2013'}</div><div class="sub">${rep.txs.length} entries \u00b7 ${esc(filterText())}</div></div>
     </div>
     <div class="grid">
-      <div class="card span-7"><div class="card-head"><h2>Income vs spending by category</h2><span class="muted" style="font-size:13px">by ${rep.unit}</span></div><div class="chart-box"><canvas id="ch-flow" role="img" aria-label="Income and spending by ${rep.unit}"></canvas></div></div>
+      <div class="card span-7"><div class="card-head"><h2>${rep.isDay?'Last 7 days by category':'Income vs spending by category'}</h2><span class="muted" style="font-size:13px">by ${rep.unit}</span></div><div class="chart-box"><canvas id="ch-flow" role="img" aria-label="Income and spending by ${rep.unit}"></canvas></div></div>
       <div class="card span-5"><div class="card-head"><h2>Where the money went</h2></div>${rep.expRows.some(x=>x.amount>0)?`<div class="chart-box" style="height:${Math.max(200,Math.min(10,rep.expRows.filter(x=>x.amount>0).length)*34+40)}px"><canvas id="ch-cat" role="img" aria-label="Spending by category"></canvas></div>`:'<p class="empty">No spending in this period.</p>'}</div>
       <div class="card span-12"><div class="card-head"><div><h2>By category</h2><p class="desc">Transfers between your own sources are left out. ${budgetNote}</p></div></div>
         <div class="tbl-wrap"><table>
@@ -1323,6 +1328,7 @@ function renderReport(){
 }
 // Each spending category keeps one colour everywhere (its place in the category list), so colours never shift between periods.
 function catColor(id){ const i=S.cats.filter(c=>c.type==='Expense').findIndex(c=>c.id===id); return tok(i>=0&&i<8?'--cat-'+(i+1):'--cat-other'); }
+function dimColor(c){ return /^#[0-9a-f]{6}$/i.test(c)?c+'59':c; }
 function drawCharts(rep){
   charts.forEach(c=>c.destroy()); charts=[];
   const C=window.Chart;
@@ -1333,10 +1339,10 @@ function drawCharts(rep){
   const flow=$('#ch-flow');
   if(flow) charts.push(new C(flow,{type:'bar',
     data:{labels:rep.buckets.map(b=>b.label),datasets:[
-      {label:'Income',data:rep.buckets.map(b=>b.inc),backgroundColor:tok('--ink'),borderRadius:4,maxBarThickness:22,stack:'in'},
-      ...rep.expRows.filter(x=>x.amount>0).map(x=>({label:x.name,data:rep.buckets.map(b=>b.cats[x.id]||0),backgroundColor:catColor(x.id),borderColor:tok('--surface'),borderWidth:{top:1},borderSkipped:'bottom',borderRadius:2,maxBarThickness:22,stack:'out'}))]},
+      {label:'Income',legendColor:tok('--ink'),data:rep.buckets.map(b=>b.inc),backgroundColor:rep.isDay?rep.buckets.map(b=>b.sel?tok('--ink'):dimColor(tok('--ink'))):tok('--ink'),borderRadius:4,maxBarThickness:22,stack:'in'},
+      ...(rep.isDay?rep.chartCats:rep.expRows.filter(x=>x.amount>0)).map(x=>({label:x.name,legendColor:catColor(x.id),data:rep.buckets.map(b=>b.cats[x.id]||0),backgroundColor:rep.isDay?rep.buckets.map(b=>b.sel?catColor(x.id):dimColor(catColor(x.id))):catColor(x.id),borderColor:tok('--surface'),borderWidth:{top:1},borderSkipped:'bottom',borderRadius:2,maxBarThickness:22,stack:'out'}))]},
     options:{responsive:true,maintainAspectRatio:false,animation:reduce?false:{duration:300},interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,color:ink}},tooltip:{filter:i=>i.parsed.y>0,callbacks:{label:c=>c.dataset.label+': '+money(c.parsed.y)}}},
+      plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10,color:ink,generateLabels:ch=>C.defaults.plugins.legend.labels.generateLabels(ch).map(l=>{ const c=ch.data.datasets[l.datasetIndex].legendColor; return c?{...l,fillStyle:c,strokeStyle:c}:l; })}},tooltip:{filter:i=>i.parsed.y>0,callbacks:{label:c=>c.dataset.label+': '+money(c.parsed.y)}}},
       scales:{x:{stacked:true,grid:{display:false},ticks:{color:muted,maxRotation:0,autoSkip:true,autoSkipPadding:8}},y:{stacked:true,beginAtZero:true,grid:{color:line},border:{display:false},ticks:{color:muted,callback:v=>compact(v),maxTicksLimit:6}}}}}));
   const cat=$('#ch-cat');
   if(cat){ const top=rep.expRows.filter(x=>x.amount>0).slice(0,10);
@@ -1345,7 +1351,7 @@ function drawCharts(rep){
         scales:{x:{beginAtZero:true,grid:{color:line},border:{display:false},ticks:{color:muted,callback:v=>compact(v),maxTicksLimit:5}},y:{grid:{display:false},ticks:{color:ink}}}}})); }
 }
 $('#r-period').addEventListener('click',e=>{ const b=e.target.closest('button[data-p]'); if(!b) return; R.period=b.dataset.p; store.set('period',R.period); if(R.period==='custom'&&!R.from){ const r={start:monthStart(R.anchor),end:monthEnd(R.anchor)}; R.from=r.start; R.to=r.end; } renderReport(); });
-function shift(dir){ R.anchor = R.period==='week'?addDays(R.anchor,7*dir):addMonths(R.anchor,(R.period==='half'?6:R.period==='year'?12:1)*dir); renderReport(); }
+function shift(dir){ R.anchor = R.period==='day'?addDays(R.anchor,dir):R.period==='week'?addDays(R.anchor,7*dir):addMonths(R.anchor,(R.period==='half'?6:R.period==='year'?12:1)*dir); renderReport(); }
 $('#r-prev').onclick=()=>shift(-1); $('#r-next').onclick=()=>shift(1);
 $('#r-from').addEventListener('change',e=>{ R.from=e.target.value; renderReport(); });
 $('#r-to').addEventListener('change',e=>{ R.to=e.target.value; renderReport(); });
